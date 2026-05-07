@@ -1,0 +1,23 @@
+Atividades PráticasSupervisionadas (APS) Algoritmos e Programação EstruturadaPROFA .IVANA
+
+Atividades Práticas Supervisionadas• APS (Atividades Práticas Supervisionadas) é um instrumento avaliativo que integra ensino e extensão, promovendo o desenvolvimento das competências do  Projeto Pedagógicos do Curso de Engenharia da Computação de Análise e Desenvolvimento de Sistemas. 
+2
+
+Atividades Práticas Supervisionadas• Propósitos:• Estimular a participação ativa do aluno na construção do próprio conhecimento• Desenvolver autonomia intelectual e acadêmica• Conectar o conteúdo teórico à realidade social e profissional• Desenvolver competências e habilidades essenciais para a atuação no mercado• Metas:• Propor uma solução desafiadora, mesmo para iniciantes em programação• Estimular o raciocínio lógico e a resolução criativa de problemas• Aplicar na prática os conceitos de algoritmos e programação estudados em sala de aula3
+Atividades Práticas Supervisionadas• Tema:• Desenvolvimento de aplicação utilizando técnicas criptográficas• A criptografia é uma das áreas mais relevantes da segurança da informação. Implementar um algoritmo criptográfico do zero exige compreensão profunda de lógica, manipulação de dados e estruturas de programação — habilidades centrais da disciplina. 4
+
+Atividades Práticas Supervisionadas• Equipes/Grupos de 5 alunos• Um grupo pode ser composto por alunos dos dois cursos ou do mesmo curso• Entregas obrigatórias: • Relatório escrito: pesquisa bibliográfica seguindo as normas da ABNT NBR 14724• Aplicação em Python: programa funcional do algoritmo criptográfico escolhido pelo grupo, proibidaa utilização de bibliotecas prontas de criptografia do Python• Apresentação: exposição oral da solução desenvolvida • Entregas opcionais:• Interface gráfica• Geração automática de chaves, se o algoritmo exigir• Funções auxiliares que não realizem diretamente a criptografia/descriptografia5
+Atividades Práticas Supervisionadas• Relatório escrito deve seguir rigorosamente a norma ABNT NBR 14724 para elaboração de trabalhos acadêmicos e conter, no mínimo, os seguintes elementos (modelo será disponibilizado):• Capa • Sumário• Introdução• Fundamentos da criptografia• Descrição da técnica criptográfica escolhida• Solução desenvolvida• Código fonte• Referências bibliográficas6
+Atividades Práticas Supervisionadas• A aplicação deverá apresentar um menu interativo com três opções obrigatórias
+7
+1. Criptografia: lê uma frase (até 256 caracteres) e uma chave. Em seguida, exibe o texto criptografado2. Descriptografia: lê o texto criptografado e a chave. Em seguida, exibe a frase original3. Sair: encerra a aplicação
+Atividades Práticas Supervisionadas• Critérios de avaliação: serão considerados tanto o cumprimento dos requisitos mínimos quanto a qualidade e complexidade da solução entregue
+8
+
+Atividades Práticas SupervisionadasDATAS:Entrega Relatório: 25/05/2026Apresentação: 01/06/20269
+
+Atividades Práticas Supervisionadas• O requisito mínimo será o desenvolvimento da Cifra de César (cifra de troca)• A Cifra de César é uma técnica de substituição simples onde cada letra do texto é substituída por outra que se encontra em um número fixo de posições no alfabeto
+10
+
+Atividades Práticas Supervisionadas• Diferentes algoritmos podem ser implementados, variando em complexidade e nível de desafio.• Cifra de Vigenère• DES (Data Encryption Standard)• AES (Advanced Encryption Standard) (criptografia simétrica)• RSA (Rivest-Shamir-Adleman) (criptografia assimétrica)• Outros...11
+Referências Bibliográficas•STALLINGS, William. Criptografia e segurança de redes: princípios e práticas. 4. e 6 ed. São Paulo: Pearson, 2008. E-book. Disponível em: https://plataforma.bvirtual.com.brhttps://plataforma.bvirtual.com.br/Leitor/Publicacao/396/pdf/0https://plataforma.bvirtual.com.br/Leitor/Publicacao/22446/pdf/71 •ROHLING, Luis José. Criptografia e criptoanálise. Curitiba, PR: Contentus, 2021. E-book. Disponível em: https://plataforma.bvirtual.com.brhttps://plataforma.bvirtual.com.br/Leitor/Publicacao/220588/pdf/012

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChaCha20 Criptografia</title>
+    <!-- Boxicons para os icones -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Google Fonts Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Nosso CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="workspace">
+        <header class="header">
+            <h1><i class='bx bx-lock-alt'></i> ChaCha20 Criptografia</h1>
+            <p>Sistema seguro de criptografia e descriptografia de textos.</p>
+        </header>
+
+        <main class="tool-container">
+            <div class="editor-area">
+                
+                <!-- Painel Esquerdo: Fluxo de Ação -->
+                <div class="action-panel">
+                    
+                    <!-- Passo 1: Modo -->
+                    <div class="step-group">
+                        <label class="step-label">1. Escolha a Operação</label>
+                        <div class="mode-selector">
+                            <button id="btn-encrypt" class="mode-btn active">Criptografar</button>
+                            <button id="btn-decrypt" class="mode-btn">Descriptografar</button>
+                        </div>
+                    </div>
+
+                    <!-- Passo 2: Texto -->
+                    <div class="step-group">
+                        <div class="editor-header">
+                            <label id="input-label" class="step-label">2. Insira a Frase Original</label>
+                            <div class="char-counter" id="char-counter">0 / 256</div>
+                        </div>
+                        <textarea id="input-text" placeholder="Digite a frase para criptografar (máx 256 caracteres)..."></textarea>
+                    </div>
+
+                    <!-- Passo 3: Chave -->
+                    <div class="step-group">
+                        <label class="step-label">3. Defina a Chave Secreta</label>
+                        <div class="input-wrapper">
+                            <i class='bx bx-key'></i>
+                            <input type="password" id="key-input" placeholder="Sua Chave Secreta" required>
+                            <button type="button" class="toggle-password" id="toggle-key" title="Mostrar senha">
+                                <i class='bx bx-hide' id="toggle-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Passo 4: Ação -->
+                    <div class="step-group action-group">
+                        <button id="action-btn" class="primary-btn">Criptografar Texto <i class='bx bx-lock'></i></button>
+                        <div id="message-area" class="message-area"></div>
+                    </div>
+
+                </div>
+
+                <!-- Painel Direito: Resultado -->
+                <div class="result-panel">
+                    <div class="editor-header">
+                        <label class="step-label">Resultado Final</label>
+                        <button id="copy-btn" class="icon-btn" title="Copiar Resultado"><i class='bx bx-copy'></i></button>
+                    </div>
+                    <textarea id="output-text" readonly placeholder="O resultado aparecerá aqui..."></textarea>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Seção de Histórico de Logs -->
+        <section class="log-container">
+            <div class="log-header">
+                <h2><i class='bx bx-history'></i> Histórico de Operações</h2>
+                <button id="clear-log-btn" class="icon-btn" title="Limpar Histórico"><i class='bx bx-trash'></i></button>
+            </div>
+            <div class="log-list" id="log-list">
+                <div class="no-logs">Nenhuma operação realizada ainda.</div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Nosso JS -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

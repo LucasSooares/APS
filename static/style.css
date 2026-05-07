@@ -1,0 +1,452 @@
+/* ==========================================================================
+   Base e Reset
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f3f4f6; /* Fundo cinza bem claro e neutro */
+    color: #111827; /* Texto quase preto, alto contraste */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinhamento mais tradicional no topo */
+    padding: 40px 20px;
+}
+
+/* ==========================================================================
+   Layout Principal
+   ========================================================================== */
+.workspace {
+    width: 100%;
+    max-width: 1024px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header {
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header i {
+    color: #2563eb;
+}
+
+.header p {
+    font-size: 14px;
+    color: #4b5563;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   Container da Ferramenta (Clean, Estilo Dashboard)
+   ========================================================================== */
+.tool-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Área de Edição e Fluxo (Duas Colunas)
+   ========================================================================== */
+.editor-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.action-panel, .result-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.result-panel {
+    height: 100%;
+}
+
+.step-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-group {
+    margin-top: auto;
+}
+
+.step-label {
+    font-size: 13px;
+    color: #374151;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Controles Individuais
+   ========================================================================== */
+
+/* Abas de Modo (Simples e limpas) */
+.mode-selector {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 6px;
+    padding: 4px;
+    border: 1px solid #e5e7eb;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    font-weight: 500;
+    font-size: 13px;
+    color: #4b5563;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.mode-btn:hover:not(.active) {
+    color: #111827;
+}
+
+.mode-btn.active {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Input da Chave */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-wrapper input {
+    width: 100%;
+    height: 42px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    color: #111827;
+    padding: 8px 40px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-wrapper input::placeholder {
+    color: #9ca3af;
+}
+
+.input-wrapper input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-wrapper > i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #6b7280;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.toggle-password:hover {
+    color: #111827;
+    background: #f3f4f6;
+}
+
+/* Botão Principal */
+.primary-btn {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 6px;
+    background: #0f172a; /* Cor preferida do usuário */
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.primary-btn:hover {
+    background: #1e293b;
+}
+
+.primary-btn:active {
+    background: #0f172a;
+}
+
+.primary-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Área dos Editores
+   ========================================================================== */
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.icon-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #4b5563;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.15s;
+}
+
+.icon-btn:hover {
+    color: #111827;
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+/* Caixas de Texto */
+.action-panel textarea {
+    height: 180px;
+}
+
+.result-panel textarea {
+    flex-grow: 1;
+    min-height: 250px;
+}
+
+textarea {
+    width: 100%;
+    resize: none;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #111827;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+}
+
+textarea::placeholder {
+    color: #9ca3af;
+    font-family: 'Poppins', sans-serif;
+}
+
+textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea[readonly] {
+    background: #f9fafb;
+    color: #0369a1; /* Um azul sóbrio para o resultado */
+}
+
+.char-counter {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* ==========================================================================
+   Mensagens de Erro/Sucesso
+   ========================================================================== */
+.message-area {
+    min-height: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.message-area.error {
+    color: #dc2626;
+}
+
+.message-area.success {
+    color: #16a34a;
+}
+
+/* ==========================================================================
+   Seção de Histórico / Logs
+   ========================================================================== */
+.log-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.log-header h2 {
+    font-size: 16px;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.log-list::-webkit-scrollbar {
+    width: 6px;
+}
+.log-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+.log-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.log-item {
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.log-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+.log-type {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.log-type.color-encrypt { color: #2563eb; }
+.log-type.color-decrypt { color: #7c3aed; }
+
+.log-time { color: #6b7280; }
+
+.log-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.log-row {
+    display: flex;
+    gap: 8px;
+    color: #374151;
+    word-break: break-all;
+}
+
+.log-row strong {
+    color: #111827;
+    min-width: 80px;
+}
+
+.log-result {
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    color: #0369a1;
+}
+
+.log-key {
+    color: #dc2626;
+}
+
+.no-logs {
+    text-align: center;
+    color: #6b7280;
+    padding: 24px;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   Responsividade
+   ========================================================================== */
+@media (max-width: 768px) {
+    .editor-area {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .action-panel textarea, .result-panel textarea {
+        height: 180px;
+    }
+    
+    body {
+        padding: 20px 15px;
+    }
+}

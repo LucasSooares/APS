@@ -1,0 +1,126 @@
+ 
+ 
+Curso de Análise e Desenvolvimento de Sistemas 
+Curso de Engenharia da Computação 
+ 
+ 
+ 
+Orientações para Atividades Práticas 
+Supervisionadas (APS) 
+ 
+ 
+ 
+Desenvolvimento de aplicação baseado no Desafio de 
+Programação proposto pelo Professor 
+1º Semestre 
+ 
+ 
+ 
+ 
+ 
+ 
+São José dos Campos 
+  
+
+1 Introdução 
+O trabalho de Atividades Práticas Supervisionadas – APS constitui um instrumento avaliativo 
+concebido como parte integrante das metodologias inovadoras e como possibilidade integradora das 
+ações de ensino e extensão, que contribuem para o desenvolvimento das competências do perfil 
+profissional dos egressos, previstas no Projeto Pedagógicos do Curso de Engenharia da Computação  
+e no Curso de Análise e Desenvolvimento de Sistemas. 
+A APS auxilia no processo de aprendizagem propiciando aos discentes a participação ativa na 
+construção do próprio conhecimento, o desenvolvimento da autonomia  intelectual e acadêmica e a 
+constante interação entre o conteúdo trabalhado e a realidade  social, propiciando o 
+desenvolvimento das competências e habilidades necessárias para sua atuação profissional. 
+2 Objetivos 
+A APS deste semestre está relacionada com a disciplina de Algoritmos e Programação Estruturada e 
+tem como finalidade a introdução do aluno aos diversos contextos na elaboração de um aplicativo 
+computacional.  
+O Professor Responsável deve propor o desenvolvimento de uma aplicação considerando os 
+aspectos apresentados em sala de aula , mas que possibilite ao aluno  ou grupo de alunos , mesmo 
+que iniciante no ambiente de programação, um desafio instigante na implementação da solução.  
+É possível considerar, dentro do tema escolhido, a relação com o conteúdo de uma outra disciplina 
+do semestre. 
+3 Tema 
+“Desenvolvimento de aplicação utilizando técnicas criptográficas” 
+4 Metodologia 
+O trabalho poderá ser desenvolvido em grupo ou individualmente. A quantidade de alunos por grupo 
+poderá ser definida pelo Professor Responsável com a anuência do Coordenador do Curso. 
+O aluno ou grupo de alunos deverá realizar uma pesquisa bibliográfica  (Relatório escrito)  sobre o 
+tema proposto  utilizando fontes confiáveis , desenvolver uma aplicação criptográfica utilizando a 
+linguagem Python (Aplicação) e realizar a apresentação da solução desenvolvida (Apresentação).  
+5 Componentes 
+5.1 Relatório Escrito 
+O aluno ou grupo de alunos deverá apresentar um relatório escrito  e a  estrutura do relatório deve 
+seguir a Norma ABNT NBR 14724 para Elaboração de Trabalhos Acadêmicos em sua versão mais 
+atual. O relatório deve conter no mínimo, os seguintes elementos: 
+• Capa 
+• Sumário 
+• Introdução 
+• Fundamentos de criptografia 
+• Descrição da técnica criptográfica escolhida 
+• Solução desenvolvida 
+• Código-fonte 
+• Referências 
+5.2 Apresentação 
+A apresentação da solução desenvolvida pelo aluno ou pelo grupo será agendada pelo Professor 
+Responsável, podendo, a critério da Coordenação do Curso, ser definida uma Banca Avaliadora. 
+5.3 Requisitos da Aplicação 
+A aplicação deverá possuir um menu com as seguintes opções: 
+1. Criptografia 
+2. Descriptografia 
+3. Sair 
+Na “Criptografia” , a aplicação deverá fazer a leitura de uma frase de até 256 caracteres e uma chave. 
+Após a leitura desses dados, a aplicação deverá apresentar o texto criptografado.  Na 
+“Descriptografia” , a aplicação deverá fazer a leitura do texto criptografado e da chave. Após a leitura 
+desses dados, a aplicação deverá apresentar a frase original.  Em “ Sair” , a aplicação deverá ser 
+finalizada. 
+Opcionalmente, a aplicação poderá gerar as chaves, caso a sua geração dependa de requisitos 
+específicos. A aplicação poderá ser desenvolvida utilizando interface gráfica, mas não é obrigatório.  
+Não será permitido o uso de bibliotecas prontas para a realização da criptografia das mensagens. O 
+aluno ou grupo de alunos deverá desenvolver integralmente o algoritmo de criptografia. Funções 
+auxiliares poderão ser utilizadas, desde que não tenham como finalidade a 
+criptografia/descriptografia do conteúdo. 
+A implementação de itens complementares aos requisitos mínimos resultará em uma melhor 
+avaliação por parte do professor, assim como a complexidade da solução escolhida. 
+6 Critérios de avaliação 
+O Professor Responsável ou a Banca Avaliadora deverá utilizar os seguintes critérios  para avaliação 
+do trabalho apresentado pelo aluno ou grupo de alunos: 
+Indicadores Critérios Peso Nota 
+(0 a 10) Parcial 
+Relatório escrito – 
+compreensão do 
+tema, coerência e 
+relevância 
+O texto revela compreensão adequada do tema 
+com apresentação de quadro teórico e análise 
+relevante, explicitando qualidade na discussão do 
+tema e contribuições consistentes para a 
+comunidade e para a formação acadêmica.  
+0,3   
+Relatório escrito – 
+linguagem, ortografia 
+e normas da ABNT  
+O texto apresenta linguagem adequada e atende 
+plenamente as normas ortográficas e de ABNT. 0,1   
+Apresentação – 
+domínio do tema 
+A apresentação revela clareza e domínio do tema e 
+do quadro teórico que o fundamenta. 0,2   
+Apresentação – 
+qualidade dos slides 
+de apresentação 
+Os slides de apresentação apresentam qualidade 
+de forma e conteúdo 0,1   
+Solução desenvolvida  A solução desenvolvida atende aos requisitos 
+exigidos pelo tema proposto. 0,3   
+Nota Total (10,0)  
+ 
+6.1 Utilização de ferramentas de Inteligência Artificial 
+O aluno ou grupo de alunos poderá utilizar ferramentas de Inteligência Artificial na APS, entretanto, é 
+limitada a revisão gramatical e sugestão de referências bibliográficas para uso na pesquisa. 
+De qualquer forma, o aluno ou grupo de aluno deve mencionar no Relatório o seu uso, descrevendo 
+qual atividade foi executada com o auxílio da IA e qual(is) ferramenta(s) foi/foram utilizada(s). 
+7 Entrega 
+A data de entrega deverá ser realizada no Sistema definido pela Coordenação, dentro do prazo 
+apresentado no Calendário Acadêmico do semestre corrente. 
