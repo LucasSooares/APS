@@ -44,14 +44,13 @@
                     </div>
 
                     <!-- Passo 3: Chave -->
-                    <div class="step-group">
-                        <label class="step-label">3. Defina a Chave Secreta</label>
+                    <div class="step-group" id="key-step-container">
+                        <div class="editor-header">
+                            <label id="key-label" class="step-label">3. Insira a Chave Secreta Usada</label>
+                        </div>
                         <div class="input-wrapper">
                             <i class='bx bx-key'></i>
-                            <input type="password" id="key-input" placeholder="Sua Chave Secreta" required>
-                            <button type="button" class="toggle-password" id="toggle-key" title="Mostrar senha">
-                                <i class='bx bx-hide' id="toggle-icon"></i>
-                            </button>
+                            <input type="text" id="key-input" placeholder="Cole a chave secreta aqui..." required>
                         </div>
                     </div>
 
@@ -65,11 +64,30 @@
 
                 <!-- Painel Direito: Resultado -->
                 <div class="result-panel">
-                    <div class="editor-header">
-                        <label class="step-label">Resultado Final</label>
-                        <button id="copy-btn" class="icon-btn" title="Copiar Resultado"><i class='bx bx-copy'></i></button>
+                    <div class="step-group" style="height: 100%; display: flex; flex-direction: column;">
+                        <div class="editor-header">
+                            <label class="step-label">Resultado Final</label>
+                            <button id="copy-btn" class="icon-btn" title="Copiar Resultado"><i class='bx bx-copy'></i></button>
+                        </div>
+                        <textarea id="output-text" readonly placeholder="O resultado aparecerá aqui..." style="flex-grow: 1; min-height: 150px;"></textarea>
                     </div>
-                    <textarea id="output-text" readonly placeholder="O resultado aparecerá aqui..."></textarea>
+                    
+                    <!-- Area da Chave Gerada no Resultado (Oculta por padrão) -->
+                    <div class="step-group" id="result-key-container" style="display: none; margin-top: 16px;">
+                        <div class="editor-header">
+                            <label class="step-label" style="color: #059669;"><i class='bx bx-check-shield'></i> Chave Gerada Exclusiva</label>
+                        </div>
+                        <div class="input-wrapper">
+                            <i class='bx bx-key' style="color: #059669;"></i>
+                            <input type="text" id="result-key-input" readonly style="border-color: #10b981; background: #ecfdf5; color: #047857; font-weight: 500;">
+                            <div style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 10;">
+                                <button type="button" class="icon-btn" id="copy-result-key-btn" title="Copiar Chave" style="padding: 4px; color: #059669; border: none;">
+                                    <i class='bx bx-copy' style="font-size: 18px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p style="font-size: 11px; color: #6b7280; margin-top: 4px;">Guarde esta chave em local seguro. Ela será necessária para descriptografar.</p>
+                    </div>
                 </div>
 
             </div>

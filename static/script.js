@@ -2,9 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Referencias dos elementos
     const btnEncrypt = document.getElementById('btn-encrypt');
     const btnDecrypt = document.getElementById('btn-decrypt');
+    const keyStepContainer = document.getElementById('key-step-container');
     const keyInput = document.getElementById('key-input');
-    const toggleKey = document.getElementById('toggle-key');
-    const toggleIcon = document.getElementById('toggle-icon');
+    const resultKeyContainer = document.getElementById('result-key-container');
+    const resultKeyInput = document.getElementById('result-key-input');
+    const copyResultKeyBtn = document.getElementById('copy-result-key-btn');
     const actionBtn = document.getElementById('action-btn');
     const inputText = document.getElementById('input-text');
     const outputText = document.getElementById('output-text');
@@ -14,12 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageArea = document.getElementById('message-area');
 
     let currentMode = 'encrypt'; // 'encrypt' ou 'decrypt'
+    keyStepContainer.style.display = 'none';
 
     // Alternar modo para Criptografar
     btnEncrypt.addEventListener('click', () => {
         if (currentMode !== 'encrypt') {
             inputText.value = '';
             outputText.value = '';
+            resultKeyInput.value = '';
         }
         currentMode = 'encrypt';
         btnEncrypt.classList.add('active');
@@ -29,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         actionBtn.innerHTML = "Criptografar Texto <i class='bx bx-lock'></i>";
         inputText.setAttribute('maxlength', '256');
         charCounter.style.display = 'block';
+        keyStepContainer.style.display = 'none';
+        resultKeyContainer.style.display = 'none';
         updateCharCounter();
         clearMessages();
     });
@@ -38,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentMode !== 'decrypt') {
             inputText.value = '';
             outputText.value = '';
+            keyInput.value = '';
+            resultKeyInput.value = '';
         }
         currentMode = 'decrypt';
         btnDecrypt.classList.add('active');
@@ -47,18 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
         actionBtn.innerHTML = "Descriptografar Texto <i class='bx bx-lock-open'></i>";
         inputText.removeAttribute('maxlength');
         charCounter.style.display = 'none';
+        keyStepContainer.style.display = 'block';
+        resultKeyContainer.style.display = 'none';
         clearMessages();
     });
 
-    // Visibilidade da Senha
-    toggleKey.addEventListener('click', () => {
-        if (keyInput.type === 'password') {
-            keyInput.type = 'text';
-            toggleIcon.classList.replace('bx-hide', 'bx-show');
-        } else {
-            keyInput.type = 'password';
-            toggleIcon.classList.replace('bx-show', 'bx-hide');
+    // Funções de Chave
+    function generateRandomKey() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+        let key = '';
+        for (let i = 0; i < 32; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        return key;
+    }
+
+    copyResultKeyBtn.addEventListener('click', () => {
+        if (!resultKeyInput.value) return;
+        resultKeyInput.select();
+        document.execCommand('copy');
+        
+        const originalHtml = copyResultKeyBtn.innerHTML;
+        copyResultKeyBtn.innerHTML = "<i class='bx bx-check'></i>";
+        copyResultKeyBtn.style.color = '#16a34a';
+        setTimeout(() => {
+            copyResultKeyBtn.innerHTML = originalHtml;
+            copyResultKeyBtn.style.color = '#059669';
+        }, 2000);
     });
 
     // Contador de Caracteres
@@ -102,15 +125,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Acao de Criptografar/Descriptografar
     actionBtn.addEventListener('click', async () => {
         const text = inputText.value;
-        const key = keyInput.value;
+        let key = '';
 
         if (!text) {
             showMessage('Por favor, insira um texto.', 'error');
             return;
         }
-        if (!key) {
-            showMessage('Por favor, insira sua chave secreta.', 'error');
-            return;
+
+        if (currentMode === 'encrypt') {
+            key = generateRandomKey();
+        } else {
+            key = keyInput.value;
+            if (!key) {
+                showMessage('Por favor, insira a chave secreta usada.', 'error');
+                return;
+            }
         }
 
         clearMessages();
@@ -139,6 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 outputText.value = data.result;
                 showMessage('Operação realizada com sucesso!', 'success');
                 addLogEntry(currentMode, text, data.result, key);
+                
+                if (currentMode === 'encrypt') {
+                    resultKeyInput.value = key;
+                    resultKeyContainer.style.display = 'block';
+                }
             }
         } catch (error) {
             showMessage('Erro de conexão com o servidor.', 'error');
