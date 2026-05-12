@@ -1,7 +1,7 @@
-import http.server
-import html
-import socketserver
-import urllib.parse
+import http.server  # servidor HTTP básico do Python
+import html         # permite escapar o texto para evitar problemas no HTML
+import socketserver # roda um servidor TCP simples para atender o navegador
+import urllib.parse # lê os dados enviados pelo formulário HTML
 
 # Este projeto implementa ChaCha20 em Python puro, sem bibliotecas externas.
 # A interface é feita com HTML e CSS puros, usando apenas formulários.
@@ -77,12 +77,15 @@ def preparar_chave(chave):
 
 
 def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
+    # Prepara o texto para ser mostrado com segurança no HTML.
     texto_html = html.escape(texto)
     chave_html = html.escape(chave)
     resultado_html = html.escape(resultado)
     mensagem_html = html.escape(mensagem)
     tipo_html = html.escape(tipo_mensagem)
 
+    # Gera uma página HTML completa com o resultado da operação.
+    # Essa página é o "novo frontend" retornado pelo servidor após o envio do formulário.
     return f"""<!DOCTYPE html>
 <html lang=\"pt-BR\">
 <head>
@@ -132,10 +135,13 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404, "Not found")
             return
 
+        # Recebe os dados enviados pelo formulário HTML.
         tamanho = int(self.headers.get("Content-Length", 0))
         corpo = self.rfile.read(tamanho).decode("utf-8")
         dados = urllib.parse.parse_qs(corpo)
 
+        # action vem do botão pressionado no formulário.
+        # text e key vêm dos campos de texto do formulário.
         acao = dados.get("action", [""])[0]
         texto = dados.get("text", [""])[0]
         chave = dados.get("key", [""])[0]
@@ -144,16 +150,19 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
             respond_html(self, texto, chave, "", "Texto e chave são obrigatórios.", "erro")
             return
 
+        # Prepara a chave para ser usada pelo ChaCha20.
         chave_bytes = preparar_chave(chave)
 
         try:
             if acao == "encrypt":
+                # Chama a função de criptografia e devolve uma nova página HTML com o resultado.
                 texto_bytes = texto.encode("utf-8")
                 cifrado = criptografar(chave_bytes, NONCE, texto_bytes)
                 respond_html(self, texto, chave, cifrado.hex(), "Texto criptografado.", "sucesso")
                 return
 
             if acao == "decrypt":
+                # Chama a função de descriptografia e devolve uma nova página HTML com o resultado.
                 texto_bytes = bytes.fromhex(texto.strip())
                 decifrado = criptografar(chave_bytes, NONCE, texto_bytes)
                 respond_html(self, texto, chave, decifrado.decode("utf-8"), "Texto descriptografado.", "sucesso")
