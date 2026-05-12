@@ -1,0 +1,93 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.container {
+    max-width: 540px;
+    margin: 32px auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 24px;
+}
+
+p {
+    margin: 8px 0 20px;
+    line-height: 1.5;
+    color: #4b5563;
+}
+
+.modo {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.ativo,
+#acao-btn {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+button:not(.ativo) {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+label {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+textarea,
+input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 12px;
+    font: inherit;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+textarea[readonly] {
+    background: #f9fafb;
+}
+
+.mensagem {
+    margin: 12px 0 0;
+    min-height: 24px;
+}
+
+.mensagem.erro {
+    color: #b91c1c;
+}
+
+.mensagem.sucesso {
+    color: #047857;
+}

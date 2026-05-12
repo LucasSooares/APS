@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChaCha20 Puro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>ChaCha20 Puro</h1>
+        <p>Use a mesma chave para criptografar ou descriptografar. Não há bibliotecas externas.</p>
+
+        <form action="/crypt" method="post">
+            <label for="texto">Texto</label>
+            <textarea id="texto" name="text" placeholder="Digite a mensagem ou o hexadecimal"></textarea>
+
+            <label for="chave">Chave</label>
+            <input id="chave" name="key" type="text" placeholder="Digite a chave" />
+
+            <div class="modo">
+                <button type="submit" name="action" value="encrypt">Criptografar</button>
+                <button type="submit" name="action" value="decrypt">Descriptografar</button>
+            </div>
+        </form>
+
+        <p class="mensagem"></p>
+
+        <label for="resultado">Resultado</label>
+        <textarea id="resultado" readonly placeholder="O resultado aparecerá aqui"></textarea>
+    </main>
+</body>
+</html>
