@@ -84,31 +84,38 @@ def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensa
     mensagem_html = html.escape(mensagem)
     tipo_html = html.escape(tipo_mensagem)
 
-    # Gera uma página HTML completa com o resultado da operação.
-    # Essa página é o "novo frontend" retornado pelo servidor após o envio do formulário.
+    # Gera uma página HTML completa que contém o mesmo formulário e mostra o resultado.
+    # Assim, o resultado aparece na mesma tela após o envio do formulário.
     return f"""<!DOCTYPE html>
 <html lang=\"pt-BR\">
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>ChaCha20 Resultado</title>
+    <title>ChaCha20 Puro</title>
     <link rel=\"stylesheet\" href=\"/style.css\">
 </head>
 <body>
     <main class=\"container\">
         <h1>ChaCha20 Puro</h1>
-        <p>{mensagem_html}</p>
+        <p>Use a mesma chave para criptografar ou descriptografar. Não há bibliotecas externas.</p>
 
-        <label>Texto</label>
-        <textarea readonly>{texto_html}</textarea>
+        <form action=\"/crypt\" method=\"post\">
+            <label for=\"texto\">Texto</label>
+            <textarea id=\"texto\" name=\"text\" placeholder=\"Digite a mensagem ou o hexadecimal\">{texto_html}</textarea>
 
-        <label>Chave</label>
-        <input type=\"text\" readonly value=\"{chave_html}\" />
+            <label for=\"chave\">Chave</label>
+            <input id=\"chave\" name=\"key\" type=\"text\" placeholder=\"Digite a chave\" value=\"{chave_html}\" />
 
-        <label>Resultado</label>
-        <textarea readonly>{resultado_html}</textarea>
+            <div class=\"modo\">
+                <button type=\"submit\" name=\"action\" value=\"encrypt\">Criptografar</button>
+                <button type=\"submit\" name=\"action\" value=\"decrypt\">Descriptografar</button>
+            </div>
+        </form>
 
-        <p><a href=\"/\">Voltar</a></p>
+        <p class=\"mensagem {tipo_html}\">{mensagem_html}</p>
+
+        <label for=\"resultado\">Resultado</label>
+        <textarea id=\"resultado\" readonly placeholder=\"O resultado aparecerá aqui\">{resultado_html}</textarea>
     </main>
 </body>
 </html>"""
