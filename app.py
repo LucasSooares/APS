@@ -11,10 +11,14 @@ NONCE = b"123456789012"
 
 
 def rotacionar_esquerda(valor, casas):
+    # Rotaciona os bits do valor para a esquerda dentro de 32 bits.
+    # Esse é um passo comum em algoritmos de cifra para misturar os bits.
     return ((valor << casas) & 0xFFFFFFFF) | (valor >> (32 - casas))
 
 
 def quarter_round(estado, a, b, c, d):
+    # Executa um quarter-round do ChaCha20 usando os índices fornecidos.
+    # Cada quarter-round mistura as variáveis com soma modular, XOR e rotação.
     estado[a] = (estado[a] + estado[b]) & 0xFFFFFFFF
     estado[d] = rotacionar_esquerda(estado[d] ^ estado[a], 16)
 
@@ -29,18 +33,24 @@ def quarter_round(estado, a, b, c, d):
 
 
 def bloco_chacha20(chave, nonce, contador):
+    # Inicializa o estado com as constantes do ChaCha20.
     estado = [0x61707865, 0x3320646E, 0x79622D32, 0x6B206574]
 
+    # Adiciona a chave de 32 bytes em palavras little-endian.
     for i in range(0, 32, 4):
         estado.append(int.from_bytes(chave[i:i + 4], "little"))
 
+    # Adiciona o contador do bloco.
     estado.append(contador)
 
+    # Adiciona o nonce de 12 bytes em três palavras little-endian.
     for i in range(0, 12, 4):
         estado.append(int.from_bytes(nonce[i:i + 4], "little"))
 
+    # Copia o estado inicial para o trabalho, que será transformado.
     trabalho = estado.copy()
 
+    # Aplica 10 rodadas de ChaCha20 (cada rodada tem 8 quarter rounds).
     for _ in range(10):
         quarter_round(trabalho, 0, 4, 8, 12)
         quarter_round(trabalho, 1, 5, 9, 13)
@@ -51,6 +61,7 @@ def bloco_chacha20(chave, nonce, contador):
         quarter_round(trabalho, 2, 7, 8, 13)
         quarter_round(trabalho, 3, 4, 9, 14)
 
+    # Soma o estado original com o estado transformado para gerar o bloco final.
     resultado = bytearray()
     for i in range(16):
         numero = (trabalho[i] + estado[i]) & 0xFFFFFFFF
@@ -60,8 +71,10 @@ def bloco_chacha20(chave, nonce, contador):
 
 
 def criptografar(chave, nonce, texto):
+    # Aplica o fluxo ChaCha20 sobre o texto usando XOR.
     resultado = bytearray()
 
+    # Processa o texto em blocos de 64 bytes.
     for bloco_inicio in range(0, len(texto), 64):
         fluxo = bloco_chacha20(chave, nonce, bloco_inicio // 64)
         parte_texto = texto[bloco_inicio:bloco_inicio + 64]
@@ -73,6 +86,8 @@ def criptografar(chave, nonce, texto):
 
 
 def preparar_chave(chave):
+    # Converte a chave para bytes UTF-8 e garante exatamente 32 bytes.
+    # Se for menor, preenche com espaços. Se for maior, corta.
     return chave.encode("utf-8").ljust(32, b" ")[:32]
 
 
@@ -122,6 +137,7 @@ def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensa
 
 
 def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
+    # Envia a página HTML de resposta para o navegador.
     pagina = render_result_page(texto, chave, resultado, mensagem, tipo_mensagem)
     resposta = pagina.encode("utf-8")
     handler.send_response(200)
@@ -154,31 +170,35 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
         chave = dados.get("key", [""])[0]
 
         if not texto or not chave:
+            # Se faltar texto ou chave, mostra uma mensagem de erro.
             respond_html(self, texto, chave, "", "Texto e chave são obrigatórios.", "erro")
             return
 
-        # Prepara a chave para ser usada pelo ChaCha20.
+        # Converte a chave para bytes e garante tamanho de 32 bytes.
         chave_bytes = preparar_chave(chave)
 
         try:
             if acao == "encrypt":
-                # Chama a função de criptografia e devolve uma nova página HTML com o resultado.
+                # Criptografa texto normal e mostra o resultado em hexadecimal.
                 texto_bytes = texto.encode("utf-8")
                 cifrado = criptografar(chave_bytes, NONCE, texto_bytes)
                 respond_html(self, texto, chave, cifrado.hex(), "Texto criptografado.", "sucesso")
                 return
 
             if acao == "decrypt":
-                # Chama a função de descriptografia e devolve uma nova página HTML com o resultado.
+                # Descriptografa o texto hexadecimal e mostra o texto original.
                 texto_bytes = bytes.fromhex(texto.strip())
                 decifrado = criptografar(chave_bytes, NONCE, texto_bytes)
                 respond_html(self, texto, chave, decifrado.decode("utf-8"), "Texto descriptografado.", "sucesso")
                 return
 
+            # Caso o valor de action não seja reconhecido.
             respond_html(self, texto, chave, "", "Ação inválida.", "erro")
         except ValueError:
+            # Erro ao converter o texto hexadecimal.
             respond_html(self, texto, chave, "", "Texto inválido. Use hexadecimal correto.", "erro")
         except UnicodeDecodeError:
+            # Erro ao decodificar o texto descriptografado como UTF-8.
             respond_html(self, texto, chave, "", "Chave incorreta ou texto corrompido.", "erro")
 
     def log_message(self, format, *args):
