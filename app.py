@@ -76,7 +76,7 @@ def preparar_chave(chave):
     return chave.encode("utf-8").ljust(32, b" ")[:32]
 
 
-def render_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
+def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
     texto_html = html.escape(texto)
     chave_html = html.escape(chave)
     resultado_html = html.escape(resultado)
@@ -88,38 +88,31 @@ def render_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem='')
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>ChaCha20 Puro</title>
+    <title>ChaCha20 Resultado</title>
     <link rel=\"stylesheet\" href=\"/style.css\">
 </head>
 <body>
     <main class=\"container\">
         <h1>ChaCha20 Puro</h1>
-        <p>Use a mesma chave para criptografar ou descriptografar. Não há bibliotecas externas.</p>
+        <p>{mensagem_html}</p>
 
-        <form action=\"/crypt\" method=\"post\">
-            <label for=\"texto\">Texto</label>
-            <textarea id=\"texto\" name=\"text\" placeholder=\"Digite a mensagem ou o hexadecimal\">{texto_html}</textarea>
+        <label>Texto</label>
+        <textarea readonly>{texto_html}</textarea>
 
-            <label for=\"chave\">Chave</label>
-            <input id=\"chave\" name=\"key\" type=\"text\" value=\"{chave_html}\" placeholder=\"Digite a chave\" />
+        <label>Chave</label>
+        <input type=\"text\" readonly value=\"{chave_html}\" />
 
-            <div class=\"modo\">
-                <button type=\"submit\" name=\"action\" value=\"encrypt\">Criptografar</button>
-                <button type=\"submit\" name=\"action\" value=\"decrypt\">Descriptografar</button>
-            </div>
-        </form>
+        <label>Resultado</label>
+        <textarea readonly>{resultado_html}</textarea>
 
-        <p class=\"mensagem {tipo_html}\">{mensagem_html}</p>
-
-        <label for=\"resultado\">Resultado</label>
-        <textarea id=\"resultado\" readonly>{resultado_html}</textarea>
+        <p><a href=\"/\">Voltar</a></p>
     </main>
 </body>
 </html>"""
 
 
 def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
-    pagina = render_page(texto, chave, resultado, mensagem, tipo_mensagem)
+    pagina = render_result_page(texto, chave, resultado, mensagem, tipo_mensagem)
     resposta = pagina.encode("utf-8")
     handler.send_response(200)
     handler.send_header("Content-Type", "text/html; charset=utf-8")
@@ -130,10 +123,8 @@ def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_me
 
 class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path in ["/", "/index.html"]:
-            respond_html(self)
-            return
-
+        if self.path == "/":
+            self.path = "/index.html"
         return super().do_GET()
 
     def do_POST(self):
