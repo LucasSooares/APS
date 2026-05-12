@@ -1,261 +1,202 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Referencias dos elementos
-    const btnEncrypt = document.getElementById('btn-encrypt');
-    const btnDecrypt = document.getElementById('btn-decrypt');
-    const keyStepContainer = document.getElementById('key-step-container');
-    const keyInput = document.getElementById('key-input');
-    const resultKeyContainer = document.getElementById('result-key-container');
-    const resultKeyInput = document.getElementById('result-key-input');
-    const copyResultKeyBtn = document.getElementById('copy-result-key-btn');
-    const actionBtn = document.getElementById('action-btn');
-    const inputText = document.getElementById('input-text');
-    const outputText = document.getElementById('output-text');
-    const inputLabel = document.getElementById('input-label');
-    const charCounter = document.getElementById('char-counter');
-    const copyBtn = document.getElementById('copy-btn');
-    const messageArea = document.getElementById('message-area');
+document.addEventListener("DOMContentLoaded", () => {
+    // Guarda referencias dos elementos da tela para reutilizar nas funcoes.
+    const btnEncrypt = document.getElementById("btn-encrypt");
+    const btnDecrypt = document.getElementById("btn-decrypt");
+    const inputText = document.getElementById("input-text");
+    const outputText = document.getElementById("output-text");
+    const inputLabel = document.getElementById("input-label");
+    const charCounter = document.getElementById("char-counter");
+    const keyArea = document.getElementById("key-area");
+    const keyInput = document.getElementById("key-input");
+    const actionBtn = document.getElementById("action-btn");
+    const messageArea = document.getElementById("message-area");
+    const copyBtn = document.getElementById("copy-btn");
+    const resultKeyArea = document.getElementById("result-key-area");
+    const resultKeyInput = document.getElementById("result-key-input");
+    const copyResultKeyBtn = document.getElementById("copy-result-key-btn");
+    const logList = document.getElementById("log-list");
+    const clearLogBtn = document.getElementById("clear-log-btn");
 
-    let currentMode = 'encrypt'; // 'encrypt' ou 'decrypt'
-    keyStepContainer.style.display = 'none';
+    let modo = "encrypt";
+    let historico = JSON.parse(localStorage.getItem("historicoCripto")) || [];
 
-    // Alternar modo para Criptografar
-    btnEncrypt.addEventListener('click', () => {
-        if (currentMode !== 'encrypt') {
-            inputText.value = '';
-            outputText.value = '';
-            resultKeyInput.value = '';
-        }
-        currentMode = 'encrypt';
-        btnEncrypt.classList.add('active');
-        btnDecrypt.classList.remove('active');
-        inputLabel.textContent = '2. Insira a Frase Original';
-        inputText.placeholder = 'Digite a frase para criptografar (máx 256 caracteres)...';
-        actionBtn.innerHTML = "Criptografar Texto <i class='bx bx-lock'></i>";
-        inputText.setAttribute('maxlength', '256');
-        charCounter.style.display = 'block';
-        keyStepContainer.style.display = 'none';
-        resultKeyContainer.style.display = 'none';
-        updateCharCounter();
-        clearMessages();
-    });
+    function gerarChave() {
+        // Cria uma chave aleatoria com 32 caracteres para a criptografia.
+        const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let chave = "";
 
-    // Alternar modo para Descriptografar
-    btnDecrypt.addEventListener('click', () => {
-        if (currentMode !== 'decrypt') {
-            inputText.value = '';
-            outputText.value = '';
-            keyInput.value = '';
-            resultKeyInput.value = '';
-        }
-        currentMode = 'decrypt';
-        btnDecrypt.classList.add('active');
-        btnEncrypt.classList.remove('active');
-        inputLabel.textContent = '2. Insira o Texto Hexadecimal';
-        inputText.placeholder = 'Cole o texto hexadecimal para descriptografar...';
-        actionBtn.innerHTML = "Descriptografar Texto <i class='bx bx-lock-open'></i>";
-        inputText.removeAttribute('maxlength');
-        charCounter.style.display = 'none';
-        keyStepContainer.style.display = 'block';
-        resultKeyContainer.style.display = 'none';
-        clearMessages();
-    });
-
-    // Funções de Chave
-    function generateRandomKey() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-        let key = '';
         for (let i = 0; i < 32; i++) {
-            key += chars.charAt(Math.floor(Math.random() * chars.length));
+            const posicao = Math.floor(Math.random() * caracteres.length);
+            chave += caracteres[posicao];
         }
-        return key;
+
+        return chave;
     }
 
-    copyResultKeyBtn.addEventListener('click', () => {
-        if (!resultKeyInput.value) return;
-        resultKeyInput.select();
-        document.execCommand('copy');
-        
-        const originalHtml = copyResultKeyBtn.innerHTML;
-        copyResultKeyBtn.innerHTML = "<i class='bx bx-check'></i>";
-        copyResultKeyBtn.style.color = '#16a34a';
-        setTimeout(() => {
-            copyResultKeyBtn.innerHTML = originalHtml;
-            copyResultKeyBtn.style.color = '#059669';
-        }, 2000);
-    });
-
-    // Contador de Caracteres
-    inputText.addEventListener('input', () => {
-        if (currentMode === 'encrypt') {
-            updateCharCounter();
-        }
-    });
-
-    function updateCharCounter() {
-        const length = inputText.value.length;
-        charCounter.textContent = `${length} / 256`;
+    function mostrarMensagem(texto, tipo) {
+        // Exibe mensagens de sucesso ou erro abaixo do botao principal.
+        messageArea.textContent = texto;
+        messageArea.className = tipo;
     }
 
-    // Limpar mensagens
-    function clearMessages() {
-        messageArea.textContent = '';
-        messageArea.className = 'message-area';
+    function limparMensagem() {
+        mostrarMensagem("", "");
     }
 
-    // Mostrar mensagens
-    function showMessage(msg, type) {
-        messageArea.textContent = msg;
-        messageArea.className = `message-area ${type}`;
+    function atualizarContador() {
+        // Mostra apenas quantos caracteres foram digitados, sem limite maximo.
+        const total = inputText.value.length;
+        charCounter.textContent = `${total} ${total === 1 ? "caractere" : "caracteres"}`;
     }
 
-    // Copiar para area de transferencia
-    copyBtn.addEventListener('click', () => {
-        if (!outputText.value) return;
-        
-        outputText.select();
-        document.execCommand('copy');
-        
-        const originalHtml = copyBtn.innerHTML;
-        copyBtn.innerHTML = "<i class='bx bx-check'></i> Copiado!";
-        setTimeout(() => {
-            copyBtn.innerHTML = originalHtml;
-        }, 2000);
-    });
+    function limparCampos() {
+        // Limpa entradas, resultado, chave gerada e mensagens ao trocar de modo.
+        inputText.value = "";
+        outputText.value = "";
+        keyInput.value = "";
+        resultKeyInput.value = "";
+        resultKeyArea.classList.add("escondido");
+        limparMensagem();
+        atualizarContador();
+    }
 
-    // Acao de Criptografar/Descriptografar
-    actionBtn.addEventListener('click', async () => {
-        const text = inputText.value;
-        let key = '';
+    function mudarModo(novoModo) {
+        // Alterna a interface entre criptografar e descriptografar.
+        modo = novoModo;
+        limparCampos();
 
-        if (!text) {
-            showMessage('Por favor, insira um texto.', 'error');
+        const criptografando = modo === "encrypt";
+
+        btnEncrypt.classList.toggle("ativo", criptografando);
+        btnDecrypt.classList.toggle("ativo", !criptografando);
+        keyArea.classList.toggle("escondido", criptografando);
+        charCounter.classList.toggle("escondido", !criptografando);
+
+        inputLabel.textContent = criptografando ? "Mensagem" : "Texto hexadecimal";
+        inputText.placeholder = criptografando ? "Digite sua mensagem" : "Cole o texto criptografado";
+        actionBtn.textContent = criptografando ? "Criptografar" : "Descriptografar";
+    }
+
+    async function copiarTexto(texto) {
+        // Copia o conteudo informado para a area de transferencia do navegador.
+        if (!texto) {
             return;
         }
 
-        if (currentMode === 'encrypt') {
-            key = generateRandomKey();
-        } else {
-            key = keyInput.value;
-            if (!key) {
-                showMessage('Por favor, insira a chave secreta usada.', 'error');
-                return;
-            }
-        }
+        await navigator.clipboard.writeText(texto);
+        mostrarMensagem("Texto copiado.", "sucesso");
+    }
 
-        clearMessages();
-        actionBtn.disabled = true;
-        const originalBtnHtml = actionBtn.innerHTML;
-        actionBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Processando...";
+    function salvarHistorico(entrada, saida, chave) {
+        // Salva as ultimas operacoes no localStorage do navegador.
+        historico.unshift({
+            modo,
+            entrada,
+            saida,
+            chave,
+            hora: new Date().toLocaleTimeString()
+        });
 
-        try {
-            const response = await fetch('/api/crypt', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: currentMode,
-                    text: text,
-                    key: key
-                })
-            });
+        historico = historico.slice(0, 20);
+        localStorage.setItem("historicoCripto", JSON.stringify(historico));
+        mostrarHistorico();
+    }
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                showMessage(data.error || 'Ocorreu um erro.', 'error');
-            } else {
-                outputText.value = data.result;
-                showMessage('Operação realizada com sucesso!', 'success');
-                addLogEntry(currentMode, text, data.result, key);
-                
-                if (currentMode === 'encrypt') {
-                    resultKeyInput.value = key;
-                    resultKeyContainer.style.display = 'block';
-                }
-            }
-        } catch (error) {
-            showMessage('Erro de conexão com o servidor.', 'error');
-        } finally {
-            actionBtn.disabled = false;
-            actionBtn.innerHTML = originalBtnHtml;
-        }
-    });
-
-    // Funções de Log
-    const logList = document.getElementById('log-list');
-    const clearLogBtn = document.getElementById('clear-log-btn');
-
-    let logsArray = JSON.parse(localStorage.getItem('cryptoLogs')) || [];
-
-    function renderLogs() {
-        if (logsArray.length === 0) {
-            logList.innerHTML = '<div class="no-logs">Nenhuma operação realizada ainda.</div>';
+    function mostrarHistorico() {
+        // Renderiza o historico salvo, escapando textos digitados pelo usuario.
+        if (historico.length === 0) {
+            logList.innerHTML = "<p>Nenhuma operação feita ainda.</p>";
             return;
         }
-        
-        logList.innerHTML = '';
-        
-        logsArray.forEach(log => {
-            const entry = document.createElement('div');
-            entry.className = 'log-item';
-            
-            const typeLabel = log.mode === 'encrypt' ? 'Criptografado' : 'Descriptografado';
-            const icon = log.mode === 'encrypt' ? 'bx-lock' : 'bx-lock-open';
-            const colorClass = log.mode === 'encrypt' ? 'color-encrypt' : 'color-decrypt';
-            
-            entry.innerHTML = `
-                <div class="log-item-header">
-                    <span class="log-type ${colorClass}"><i class='bx ${icon}'></i> ${typeLabel}</span>
-                    <span class="log-time">${log.time}</span>
-                </div>
-                <div class="log-content">
-                    <div class="log-row"><strong>Original:</strong> <span>${escapeHtml(log.input)}</span></div>
-                    <div class="log-row"><strong>Resultado:</strong> <span class="log-result">${escapeHtml(log.output)}</span></div>
-                    <div class="log-row log-key"><strong>Chave:</strong> <span>${escapeHtml(log.key)}</span></div>
-                </div>
+
+        logList.innerHTML = "";
+
+        historico.forEach((item) => {
+            const div = document.createElement("div");
+            const titulo = item.modo === "encrypt" ? "Criptografado" : "Descriptografado";
+
+            div.className = "item-historico";
+            div.innerHTML = `
+                <strong>${titulo}</strong>
+                <span>${item.hora}</span>
+                <p>Entrada: ${escaparHtml(item.entrada)}</p>
+                <p>Resultado: ${escaparHtml(item.saida)}</p>
+                <p>Chave: ${escaparHtml(item.chave)}</p>
             `;
-            logList.appendChild(entry);
+
+            logList.appendChild(div);
         });
     }
 
-    function addLogEntry(mode, input, output, key) {
-        const newLog = {
-            mode: mode,
-            input: input,
-            output: output,
-            key: key,
-            time: new Date().toLocaleTimeString()
-        };
-        
-        // Adiciona ao topo do array
-        logsArray.unshift(newLog);
-        
-        // Limita o histórico a 50 itens para não sobrecarregar
-        if (logsArray.length > 50) {
-            logsArray.pop();
-        }
-        
-        // Salva no localStorage
-        localStorage.setItem('cryptoLogs', JSON.stringify(logsArray));
-        renderLogs();
+    function escaparHtml(texto) {
+        // Evita que textos do usuario sejam interpretados como HTML.
+        return texto
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
-    clearLogBtn.addEventListener('click', () => {
-        logsArray = [];
-        localStorage.removeItem('cryptoLogs');
-        renderLogs();
+    btnEncrypt.addEventListener("click", () => mudarModo("encrypt"));
+    btnDecrypt.addEventListener("click", () => mudarModo("decrypt"));
+    inputText.addEventListener("input", atualizarContador);
+    copyBtn.addEventListener("click", () => copiarTexto(outputText.value));
+    copyResultKeyBtn.addEventListener("click", () => copiarTexto(resultKeyInput.value));
+
+    clearLogBtn.addEventListener("click", () => {
+        historico = [];
+        localStorage.removeItem("historicoCripto");
+        mostrarHistorico();
     });
 
-    function escapeHtml(unsafe) {
-        return unsafe
-             .replace(/&/g, "&amp;")
-             .replace(/</g, "&lt;")
-             .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
-             .replace(/'/g, "&#039;");
-    }
+    actionBtn.addEventListener("click", async () => {
+        // Envia a acao escolhida para o Flask e mostra o resultado retornado.
+        const texto = inputText.value;
+        const chave = modo === "encrypt" ? gerarChave() : keyInput.value;
 
-    // Renderiza o log inicial ao carregar a página
-    renderLogs();
+        if (!texto) {
+            mostrarMensagem("Digite um texto.", "erro");
+            return;
+        }
+
+        if (!chave) {
+            mostrarMensagem("Digite a chave.", "erro");
+            return;
+        }
+
+        actionBtn.disabled = true;
+        limparMensagem();
+
+        try {
+            const resposta = await fetch("/api/crypt", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: modo, text: texto, key: chave })
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                mostrarMensagem(dados.error || "Não foi possível concluir.", "erro");
+                return;
+            }
+
+            outputText.value = dados.result;
+            mostrarMensagem("Operação concluída.", "sucesso");
+            salvarHistorico(texto, dados.result, chave);
+
+            if (modo === "encrypt") {
+                resultKeyInput.value = chave;
+                resultKeyArea.classList.remove("escondido");
+            }
+        } catch {
+            mostrarMensagem("Erro ao conectar com o servidor.", "erro");
+        } finally {
+            actionBtn.disabled = false;
+        }
+    });
+
+    mudarModo("encrypt");
+    mostrarHistorico();
 });

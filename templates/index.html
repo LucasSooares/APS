@@ -3,110 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChaCha20 Criptografia</title>
-    <!-- Boxicons para os icones -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <!-- Google Fonts Poppins -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Nosso CSS -->
+    <title>ChaCha20</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-    <div class="workspace">
-        <header class="header">
-            <h1><i class='bx bx-lock-alt'></i> ChaCha20 Criptografia</h1>
-            <p>Sistema seguro de criptografia e descriptografia de textos.</p>
+    <main class="container">
+        <header>
+            <h1>Criptografia ChaCha20</h1>
+            <p>Digite uma mensagem, gere o texto criptografado e use a mesma chave para descriptografar.</p>
         </header>
 
-        <main class="tool-container">
-            <div class="editor-area">
-                
-                <!-- Painel Esquerdo: Fluxo de Ação -->
-                <div class="action-panel">
-                    
-                    <!-- Passo 1: Modo -->
-                    <div class="step-group">
-                        <label class="step-label">1. Escolha a Operação</label>
-                        <div class="mode-selector">
-                            <button id="btn-encrypt" class="mode-btn active">Criptografar</button>
-                            <button id="btn-decrypt" class="mode-btn">Descriptografar</button>
-                        </div>
-                    </div>
-
-                    <!-- Passo 2: Texto -->
-                    <div class="step-group">
-                        <div class="editor-header">
-                            <label id="input-label" class="step-label">2. Insira a Frase Original</label>
-                            <div class="char-counter" id="char-counter">0 / 256</div>
-                        </div>
-                        <textarea id="input-text" placeholder="Digite a frase para criptografar (máx 256 caracteres)..."></textarea>
-                    </div>
-
-                    <!-- Passo 3: Chave -->
-                    <div class="step-group" id="key-step-container">
-                        <div class="editor-header">
-                            <label id="key-label" class="step-label">3. Insira a Chave Secreta Usada</label>
-                        </div>
-                        <div class="input-wrapper">
-                            <i class='bx bx-key'></i>
-                            <input type="text" id="key-input" placeholder="Cole a chave secreta aqui..." required>
-                        </div>
-                    </div>
-
-                    <!-- Passo 4: Ação -->
-                    <div class="step-group action-group">
-                        <button id="action-btn" class="primary-btn">Criptografar Texto <i class='bx bx-lock'></i></button>
-                        <div id="message-area" class="message-area"></div>
-                    </div>
-
-                </div>
-
-                <!-- Painel Direito: Resultado -->
-                <div class="result-panel">
-                    <div class="step-group" style="height: 100%; display: flex; flex-direction: column;">
-                        <div class="editor-header">
-                            <label class="step-label">Resultado Final</label>
-                            <button id="copy-btn" class="icon-btn" title="Copiar Resultado"><i class='bx bx-copy'></i></button>
-                        </div>
-                        <textarea id="output-text" readonly placeholder="O resultado aparecerá aqui..." style="flex-grow: 1; min-height: 150px;"></textarea>
-                    </div>
-                    
-                    <!-- Area da Chave Gerada no Resultado (Oculta por padrão) -->
-                    <div class="step-group" id="result-key-container" style="display: none; margin-top: 16px;">
-                        <div class="editor-header">
-                            <label class="step-label" style="color: #059669;"><i class='bx bx-check-shield'></i> Chave Gerada Exclusiva</label>
-                        </div>
-                        <div class="input-wrapper">
-                            <i class='bx bx-key' style="color: #059669;"></i>
-                            <input type="text" id="result-key-input" readonly style="border-color: #10b981; background: #ecfdf5; color: #047857; font-weight: 500;">
-                            <div style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 10;">
-                                <button type="button" class="icon-btn" id="copy-result-key-btn" title="Copiar Chave" style="padding: 4px; color: #059669; border: none;">
-                                    <i class='bx bx-copy' style="font-size: 18px;"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <p style="font-size: 11px; color: #6b7280; margin-top: 4px;">Guarde esta chave em local seguro. Ela será necessária para descriptografar.</p>
-                    </div>
-                </div>
-
+        <section class="painel">
+            <div class="botoes-modo">
+                <button id="btn-encrypt" class="ativo">Criptografar</button>
+                <button id="btn-decrypt">Descriptografar</button>
             </div>
-        </main>
 
-        <!-- Seção de Histórico de Logs -->
-        <section class="log-container">
-            <div class="log-header">
-                <h2><i class='bx bx-history'></i> Histórico de Operações</h2>
-                <button id="clear-log-btn" class="icon-btn" title="Limpar Histórico"><i class='bx bx-trash'></i></button>
+            <label for="input-text" id="input-label">Mensagem</label>
+            <textarea id="input-text" placeholder="Digite sua mensagem"></textarea>
+            <span id="char-counter">0 caracteres</span>
+
+            <div id="key-area" class="campo escondido">
+                <label for="key-input">Chave</label>
+                <input id="key-input" type="text" placeholder="Digite a chave usada na criptografia">
             </div>
-            <div class="log-list" id="log-list">
-                <div class="no-logs">Nenhuma operação realizada ainda.</div>
+
+            <button id="action-btn" class="botao-principal">Criptografar</button>
+            <p id="message-area"></p>
+        </section>
+
+        <section class="painel">
+            <div class="resultado-topo">
+                <label for="output-text">Resultado</label>
+                <button id="copy-btn" class="botao-secundario">Copiar</button>
+            </div>
+            <textarea id="output-text" readonly placeholder="O resultado aparecerá aqui"></textarea>
+
+            <div id="result-key-area" class="campo chave-gerada escondido">
+                <label for="result-key-input">Chave gerada</label>
+                <div class="linha-chave">
+                    <input id="result-key-input" type="text" readonly>
+                    <button id="copy-result-key-btn" class="botao-secundario">Copiar</button>
+                </div>
+                <small>Guarde essa chave para descriptografar depois.</small>
             </div>
         </section>
 
-    </div>
+        <section class="painel">
+            <div class="resultado-topo">
+                <h2>Histórico</h2>
+                <button id="clear-log-btn" class="botao-secundario">Limpar</button>
+            </div>
+            <div id="log-list" class="historico">
+                <p>Nenhuma operação feita ainda.</p>
+            </div>
+        </section>
+    </main>
 
-    <!-- Nosso JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
