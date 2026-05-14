@@ -2,12 +2,16 @@ import http.server  # servidor HTTP básico do Python
 import html         # permite escapar o texto para evitar problemas no HTML
 import socketserver # roda um servidor TCP simples para atender o navegador
 import urllib.parse # lê os dados enviados pelo formulário HTML
+import secrets      # gera números aleatórios seguros para a chave
 
 # Este projeto implementa ChaCha20 em Python puro, sem bibliotecas externas.
 # A interface é feita com HTML e CSS puros, usando apenas formulários.
 
 # NONCE fixo apenas para este exemplo. Em um uso real, o nonce deve ser diferente para cada mensagem.
 NONCE = b"123456789012"
+
+# Armazena a chave gerada aleatoriamente na sessão
+chave_sessao = None
 
 
 def rotacionar_esquerda(valor, casas):
@@ -91,13 +95,26 @@ def preparar_chave(chave):
     return chave.encode("utf-8").ljust(32, b" ")[:32]
 
 
-def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
+def gerar_chave_aleatoria():
+    # Gera uma chave aleatória segura de 32 bytes e a converte para uma string de 32 caracteres
+    chave_bytes = secrets.token_bytes(32)
+    # Converte para uma string legível em hexadecimal
+    return chave_bytes.hex()
+
+
+def converter_chave_hex(chave_hex):
+    # Converte uma chave em formato hexadecimal de volta para bytes de 32 bytes
+    return bytes.fromhex(chave_hex)
+
+
+def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensagem='', texto_criptografado=''):
     # Prepara o texto para ser mostrado com segurança no HTML.
     texto_html = html.escape(texto)
     chave_html = html.escape(chave)
     resultado_html = html.escape(resultado)
     mensagem_html = html.escape(mensagem)
     tipo_html = html.escape(tipo_mensagem)
+    texto_cript_html = html.escape(texto_criptografado)
 
     # Gera uma página HTML completa que contém o mesmo formulário e mostra o resultado.
     # Assim, o resultado aparece na mesma tela após o envio do formulário.
@@ -106,24 +123,27 @@ def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensa
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>ChaCha20 Puro</title>
+    <title>ChaCha20</title>
     <link rel=\"stylesheet\" href=\"/style.css\">
 </head>
 <body>
     <main class=\"container\">
-        <h1>ChaCha20 Puro</h1>
-        <p>Use a mesma chave para criptografar ou descriptografar. Não há bibliotecas externas.</p>
+        <h1>ChaCha20</h1>
+        <p>Digite sua mensagem para criptografar ou cole o resultado hexadecimal para descriptografar.</p>
 
         <form action=\"/crypt\" method=\"post\">
             <label for=\"texto\">Texto</label>
             <textarea id=\"texto\" name=\"text\" placeholder=\"Digite a mensagem ou o hexadecimal\">{texto_html}</textarea>
 
-            <label for=\"chave\">Chave</label>
-            <input id=\"chave\" name=\"key\" type=\"text\" placeholder=\"Digite a chave\" value=\"{chave_html}\" />
+            <label for=\"chave\">Chave (Aleatória)</label>
+            <div class=\"chave-container\">
+                <input id=\"chave\" name=\"key\" type=\"text\" placeholder=\"Chave gerada automaticamente\" value=\"{chave_html}\" readonly />
+                <button type=\"submit\" name=\"action\" value=\"generate_key\" class=\"btn-gerar\">Gerar Nova Chave</button>
+            </div>
 
             <div class=\"modo\">
-                <button type=\"submit\" name=\"action\" value=\"encrypt\">Criptografar</button>
-                <button type=\"submit\" name=\"action\" value=\"decrypt\">Descriptografar</button>
+                <button type="submit" name="action" value="encrypt">Criptografar</button>
+                <button type="submit" name="action" value="decrypt">Descriptografar</button>
             </div>
         </form>
 
@@ -131,14 +151,16 @@ def render_result_page(texto='', chave='', resultado='', mensagem='', tipo_mensa
 
         <label for=\"resultado\">Resultado</label>
         <textarea id=\"resultado\" readonly placeholder=\"O resultado aparecerá aqui\">{resultado_html}</textarea>
+        
+        <input type=\"hidden\" id=\"texto_criptografado\" value=\"{texto_cript_html}\" />
     </main>
 </body>
 </html>"""
 
 
-def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_mensagem=''):
+def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_mensagem='', texto_criptografado=''):
     # Envia a página HTML de resposta para o navegador.
-    pagina = render_result_page(texto, chave, resultado, mensagem, tipo_mensagem)
+    pagina = render_result_page(texto, chave, resultado, mensagem, tipo_mensagem, texto_criptografado)
     resposta = pagina.encode("utf-8")
     handler.send_response(200)
     handler.send_header("Content-Type", "text/html; charset=utf-8")
@@ -149,11 +171,66 @@ def respond_html(handler, texto='', chave='', resultado='', mensagem='', tipo_me
 
 class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        global chave_sessao
+        
         if self.path == "/":
-            self.path = "/index.html"
+            # Na primeira carga, gera uma chave se ainda não houver uma
+            if not chave_sessao:
+                chave_sessao = gerar_chave_aleatoria()
+            
+            # Retorna a página inicial com a chave já gerada
+            resposta_html = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChaCha20</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>ChaCha20</h1>
+
+        <form action="/crypt" method="post">
+            <label for="texto">Texto</label>
+            <textarea id="texto" name="text" placeholder="Digite sua mensagem para criptografar ou cole o hexadecimal para descriptografar"></textarea>
+
+            <label for="chave">Chave (Aleatória)</label>
+            <div class="chave-container">
+                <input id="chave" name="key" type="text" placeholder="Chave gerada automaticamente" value="{html.escape(chave_sessao)}" readonly />
+                <button type="submit" name="action" value="generate_key" class="btn-gerar">Gerar Nova Chave</button>
+            </div>
+
+            <div class="modo">
+                <button type="submit" name="action" value="encrypt">Criptografar</button>
+                <button type="submit" name="action" value="decrypt">Descriptografar</button>
+            </div>
+        </form>
+
+        <p class="mensagem"></p>
+
+        <label for="resultado">Resultado</label>
+        <textarea id="resultado" readonly placeholder="O resultado aparecerá aqui"></textarea>
+    </main>
+</body>
+</html>"""
+            resposta = resposta_html.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(resposta)))
+            self.end_headers()
+            self.wfile.write(resposta)
+            return
+            
+        if self.path == "/index.html":
+            self.path = "/"
+            return self.do_GET()
+            
         return super().do_GET()
 
     def do_POST(self):
+        global chave_sessao
+        
         if self.path != "/crypt":
             self.send_error(404, "Not found")
             return
@@ -169,20 +246,40 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
         texto = dados.get("text", [""])[0]
         chave = dados.get("key", [""])[0]
 
-        if not texto or not chave:
-            # Se faltar texto ou chave, mostra uma mensagem de erro.
-            respond_html(self, texto, chave, "", "Texto e chave são obrigatórios.", "erro")
+        # Se não houver chave gerada, gera uma
+        if not chave_sessao:
+            chave_sessao = gerar_chave_aleatoria()
+
+        # Usa a chave da sessão se a chave do formulário estiver vazia
+        if not chave:
+            chave = chave_sessao
+        else:
+            chave_sessao = chave
+
+        # Ação para gerar uma nova chave aleatória
+        if acao == "generate_key":
+            chave_sessao = gerar_chave_aleatoria()
+            respond_html(self, texto, chave_sessao, "", "Nova chave gerada com sucesso!", "sucesso")
             return
 
-        # Converte a chave para bytes e garante tamanho de 32 bytes.
-        chave_bytes = preparar_chave(chave)
+        if not texto:
+            # Se faltar texto, mostra uma mensagem de erro.
+            respond_html(self, texto, chave_sessao, "", "Por favor, digite um texto.", "erro")
+            return
+
+        # Converte a chave hexadecimal para bytes
+        try:
+            chave_bytes = converter_chave_hex(chave)
+        except ValueError:
+            respond_html(self, texto, chave, "", "Formato de chave inválido. Use hexadecimal.", "erro")
+            return
 
         try:
             if acao == "encrypt":
                 # Criptografa texto normal e mostra o resultado em hexadecimal.
                 texto_bytes = texto.encode("utf-8")
                 cifrado = criptografar(chave_bytes, NONCE, texto_bytes)
-                respond_html(self, texto, chave, cifrado.hex(), "Texto criptografado.", "sucesso")
+                respond_html(self, texto, chave, cifrado.hex(), "Texto criptografado.", "sucesso", cifrado.hex())
                 return
 
             if acao == "decrypt":
