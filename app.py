@@ -1,14 +1,16 @@
 import http.server  # servidor HTTP básico do Python
 import json         # serializa e desserializa dados JSON
-import socketserver # roda um servidor TCP simples para atender o navegador
+import socketserver # cria o socket TCP que aceita conexões de rede
 
 # Este projeto implementa ChaCha20 em Python puro, sem bibliotecas externas.
-# A interface agora fica em index.html, e o Python só responde dados.
+# O servidor Python serve apenas dados JSON e arquivos estáticos.
+# Toda a interface de usuário fica em index.html e o Python não gera HTML.
+# O backend usa HTTP sobre TCP para comunicar com o navegador.
 
 # NONCE fixo apenas para este exemplo. Em um uso real, o nonce deve ser diferente para cada mensagem.
 NONCE = b"123456789012"
 
-# Armazena a chave gerada aleatoriamente na sessão
+# Armazena a chave gerada aleatoriamente durante a execução do servidor.
 chave_sessao = None
 
 
@@ -21,7 +23,10 @@ def rotacionar_esquerda(valor, casas):
 def quarter_round(estado, a, b, c, d):
     # Executa um quarter round do ChaCha20 usando quatro palavras do estado.
     # O ChaCha20 mistura os valores em blocos de 32 bits para espalhar dependências.
-    # Cada operação é desenhada para combinar não linearidade e difusão.
+    # Cada operação combina soma modular, XOR e rotação para criar mistura não linear.
+    # Variáveis:
+    # - estado: lista de 16 inteiros de 32 bits que representam o estado atual.
+    # - a, b, c, d: índices que apontam para quatro posições do estado.
 
     # Primeiro, mistura a e b com adição modular.
     # A soma faz com que cada bit de a dependa de b e vice-versa.
@@ -54,13 +59,17 @@ def quarter_round(estado, a, b, c, d):
 
 
 def bloco_chacha20(chave, nonce, contador):
-    # Inicializa o estado com as constantes do ChaCha20.
-    # Essas constantes são fixas para o algoritmo e evitam que o estado
-    # inicial seja apenas a chave, tornando o fluxo mais seguro.
+    # Gera um bloco de 64 bytes do fluxo ChaCha20.
+    # O estado inicial tem 16 palavras de 32 bits:
+    # - 4 constantes fixas
+    # - 8 palavras da chave de 32 bytes
+    # - 1 palavra do contador de bloco
+    # - 3 palavras do nonce de 12 bytes
+    # O contador e o nonce fazem cada bloco ser único.
     estado = [0x61707865, 0x3320646E, 0x79622D32, 0x6B206574]
 
-    # Adiciona a chave de 32 bytes em palavras little-endian.
-    # Cada 4 bytes da chave viram um inteiro de 32 bits.
+    # A chave de 32 bytes é dividida em palavras de 4 bytes em little-endian.
+    # ChaCha20 trabalha com operações de 32 bits, por isso convertemos a chave assim.
     for i in range(0, 32, 4):
         estado.append(int.from_bytes(chave[i:i + 4], "little"))
 
@@ -102,12 +111,14 @@ def bloco_chacha20(chave, nonce, contador):
 
 def criptografar(chave, nonce, texto):
     # Aplica o fluxo ChaCha20 sobre o texto usando XOR.
-    # ChaCha20 produz um fluxo de bytes pseudoaleatórios.
+    # ChaCha20 gera um fluxo pseudoaleatório a partir de chave + nonce + contador.
     # Cada byte do texto é combinado com o byte correspondente do fluxo.
     # A operação XOR é reversível: aplicar duas vezes com o mesmo fluxo retorna o original.
+    # Isso significa que a mesma função serve para cifrar e decifrar.
     resultado = bytearray()
 
     # Processa o texto em blocos de 64 bytes.
+    # Cada bloco usa um contador diferente para gerar um fluxo distinto.
     for bloco_inicio in range(0, len(texto), 64):
         fluxo = bloco_chacha20(chave, nonce, bloco_inicio // 64)
         parte_texto = texto[bloco_inicio:bloco_inicio + 64]
@@ -119,8 +130,10 @@ def criptografar(chave, nonce, texto):
 
 
 def preparar_chave(chave):
-    # Converte a chave de texto para exatamente 32 bytes.
-    # Se a chave for menor, ela é repetida até atingir 32 bytes.
+    # Converte a chave legível para exatamente 32 bytes.
+    # ChaCha20 exige uma chave de 32 bytes (256 bits).
+    # Se a chave for menor, repetimos seu conteúdo para preencher 32 bytes.
+    # Isso evita erros de tamanho e mantém o processo simples.
     chave_bytes = chave.encode("utf-8")
     if len(chave_bytes) < 32:
         chave_bytes = (chave_bytes * ((32 // len(chave_bytes)) + 1))[:32]
@@ -128,8 +141,13 @@ def preparar_chave(chave):
 
 
 def gerar_chave_aleatoria():
-    # Gera uma chave de 10 caracteres usando apenas operações do Python.
-    # A chave é baseada no próprio código e em um id de objeto novo.
+    # Gera uma chave de 10 caracteres sem usar bibliotecas externas.
+    # Essa chave é interna ao servidor e não é mostrada no front-end.
+    # Variáveis principais:
+    # - codigo: os bytes do próprio arquivo, usados como fonte de entropia.
+    # - valor: acumulador que mistura os bytes do código e o id de um novo objeto.
+    # - caracteres: conjunto de caracteres hexadecimais usados na chave.
+    # - chave: string final de 10 caracteres.
     codigo = open(__file__, "rb").read()
     valor = 0
     for byte in codigo:
@@ -146,7 +164,9 @@ def gerar_chave_aleatoria():
 
 
 def responder_json(handler, dados, status=200):
-    # Retorna um JSON com a resposta para o frontend.
+    # Envia uma resposta JSON para o frontend.
+    # O frontend usa fetch para fazer a requisição e espera dados em JSON.
+    # JSON é útil porque é um formato leve e fácil de ler no JavaScript.
     resposta = json.dumps(dados).encode("utf-8")
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
@@ -156,6 +176,9 @@ def responder_json(handler, dados, status=200):
 
 
 class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
+    # Classe que trata requisições HTTP.
+    # - GET serve a página estática index.html.
+    # - POST em /crypt executa a cifra ChaCha20 e retorna JSON.
     def do_GET(self):
         if self.path == "/":
             self.path = "/index.html"
@@ -165,10 +188,13 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         global chave_sessao
 
+        # Apenas a rota /crypt é aceita para processar criptografia/descriptografia.
         if self.path != "/crypt":
             self.send_error(404, "Not found")
             return
 
+        # Lê o corpo da requisição JSON enviado pelo frontend.
+        # O frontend usa fetch para enviar um objeto { action, text }.
         tamanho = int(self.headers.get("Content-Length", 0))
         corpo = self.rfile.read(tamanho).decode("utf-8")
 
@@ -178,6 +204,8 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
             responder_json(self, {"mensagem": "Formato JSON inválido.", "resultado": ""}, 400)
             return
 
+        # action define se vamos criptografar ou descriptografar.
+        # text é o texto digitado pelo usuário.
         acao = dados.get("action", "")
         texto = dados.get("text", "")
 
@@ -185,6 +213,9 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
             responder_json(self, {"mensagem": "Por favor, digite um texto.", "resultado": ""}, 400)
             return
 
+        # A chave é armazenada apenas no servidor.
+        # Para criptografar, geramos uma nova chave se ainda não houver.
+        # Para descriptografar, precisamos já ter uma chave em sessão.
         if acao == "encrypt":
             if not chave_sessao:
                 chave_sessao = gerar_chave_aleatoria()
@@ -213,15 +244,22 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
 
             responder_json(self, {"mensagem": "Ação inválida.", "resultado": ""}, 400)
         except ValueError:
+            # Erro ao converter o texto hexadecimal ou ao ler dados inválidos.
             responder_json(self, {"mensagem": "Texto inválido. Use hexadecimal correto.", "resultado": ""}, 400)
         except UnicodeDecodeError:
+            # Erro ao decodificar o texto descriptografado de volta para UTF-8.
             responder_json(self, {"mensagem": "Chave incorreta ou texto corrompido.", "resultado": ""}, 400)
 
     def log_message(self, format, *args):
+        # Suprime logs de acesso no console para deixar a saída mais limpa.
         return
 
 
 def main():
+    # Inicia o servidor HTTP na porta 8000.
+    # Ele atende o frontend estático e a rota /crypt para a API de criptografia.
+    # O servidor HTTP roda sobre TCP, por isso usamos socketserver.TCPServer.
+    # Sem TCPServer, não haveria escuta de conexões de rede para receber requisições.
     porta = 8000
     endereco = ("", porta)
 

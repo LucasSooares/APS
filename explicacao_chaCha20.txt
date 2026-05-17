@@ -137,6 +137,33 @@ Explicação do projeto ChaCha20 em Python
 - A chave não aparece para o usuário.
 - O servidor responde com o resultado e mensagens de erro.
 
+9.1) Rota /crypt e API JSON
+- O backend aceita apenas POST em /crypt para processar os dados.
+- O frontend envia um JSON com as chaves `action` e `text`.
+- A resposta também é JSON com `mensagem` e `resultado`.
+- O servidor não expõe a chave ao navegador.
+- GET / serve a página `index.html` e o restante dos arquivos estáticos.
+- O JSON é o formato usado para enviar e receber dados entre o JavaScript do navegador e o Python do servidor.
+- Isso é mais limpo e simples do que enviar HTML ou parâmetros de formulário.
+
+9.2) Por que usamos TCPServer?
+- `socketserver.TCPServer` cria um servidor que escuta conexões de rede na porta 8000.
+- HTTP funciona por cima de TCP; o navegador abre uma conexão TCP para enviar requisições HTTP.
+- `http.server` cuida do protocolo HTTP, mas precisa de um socket TCP para receber os dados.
+- Por isso usamos `socketserver.TCPServer` junto com `ChaChaHandler`.
+- Em outras palavras: o TCP é a camada de rede, e o HTTP é a camada de aplicação que transporta as requisições.
+
+9.3) Como o backend coloca o resultado no frontend
+- O frontend chama `fetch('/crypt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, text }) })`.
+- Isso envia um pedido HTTP POST para o servidor, com os dados em JSON.
+- O backend lê o corpo da requisição, converte o JSON em um objeto Python e processa o texto.
+- O backend responde com JSON usando `responder_json`.
+- No JavaScript, `await resposta.json()` converte a resposta em um objeto.
+- O código então escreve `dados.mensagem` e `dados.resultado` nos elementos da página:
+  - `mensagem.textContent = dados.mensagem`
+  - `resultado.value = dados.resultado`
+- Assim, o navegador mostra o texto criptografado ou descriptografado sem recarregar a página.
+
 10) Comportamento do projeto
 - Quando o usuário clica em criptografar:
   - o servidor gera a chave de sessão se ainda não existir
@@ -157,4 +184,24 @@ Explicação do projeto ChaCha20 em Python
 - Soma modular + XOR + rotação: porque ChaCha20 escolheu essas operações para segurança e difusão.
 
 ---
+12) Fontes e referências
+- ChaCha20: RFC 8439 — “ChaCha20 and Poly1305 for IETF Protocols” (Daniel J. Bernstein).
+  - Explica por que o algoritmo usa adição modular, XOR e rotação.
+  - Descreve a estrutura do estado, o uso de constantes, contador e nonce.
+- JSON: RFC 8259 — “The JavaScript Object Notation (JSON) Data Interchange Format”.
+  - Explica por que JSON é usado para trocar dados entre frontend e backend.
+- HTTP/TCP: documentação padrão de HTTP e do Python `http.server`/`socketserver`.
+  - Mostra que HTTP roda sobre TCP e que o servidor precisa escutar conexões de rede.
+- Fetch API: documentação do navegador para `fetch()` e `response.json()`.
+  - Mostra como o JavaScript envia requisições POST e recebe JSON do backend.
+
+13) Como este arquivo foi escrito
+- O código foi implementado em Python puro usando apenas a biblioteca padrão.
+- A explicação acompanha o que está no `app.py`, no `index.html` e no fluxo de comunicação.
+- As explicações foram organizadas para mostrar:
+  - por que usamos `TCPServer` e `http.server` no backend;
+  - por que usamos JSON para enviar dados;
+  - como o resultado do backend chega ao frontend via `fetch()`.
+- Essas informações foram incluídas para você poder apresentar a origem das decisões e as fontes do trabalho.
+
 Observação: este arquivo explica o projeto, a lógica e o motivo de cada parte. Se quiser, posso criar também uma versão em formato de comentários diretamente no código fonte.

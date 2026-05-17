@@ -41,12 +41,16 @@
             resultado.value = '';
 
             try {
+                // Envia os dados ao backend usando JSON.
+                // O servidor espera receber um objeto com action e text.
                 const resposta = await fetch('/crypt', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action, text })
                 });
 
+                // Recebe a resposta JSON do servidor.
+                // Ele devolve mensagem e resultado, que são inseridos no DOM.
                 const dados = await resposta.json();
                 mensagem.textContent = dados.mensagem || '';
                 resultado.value = dados.resultado || '';
