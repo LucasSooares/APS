@@ -15,6 +15,9 @@
             <label for="texto">Texto</label>
             <textarea id="texto" name="text" placeholder="Digite a mensagem ou o hexadecimal"></textarea>
 
+            <label for="chave">Chave</label>
+            <input id="chave" name="key" type="text" placeholder="A chave aparecerá aqui ao criptografar, cole-a para descriptografar">
+
             <div class="modo">
                 <button type="submit" data-action="encrypt">Criptografar</button>
                 <button type="submit" data-action="decrypt">Descriptografar</button>
@@ -31,29 +34,34 @@
         const form = document.getElementById('appForm');
         const mensagem = document.querySelector('.mensagem');
         const resultado = document.getElementById('resultado');
+        const chave = document.getElementById('chave');
 
         form.addEventListener('submit', async event => {
             event.preventDefault();
             const action = event.submitter ? event.submitter.dataset.action : 'encrypt';
             const text = document.getElementById('texto').value;
+            const key = chave.value;
 
             mensagem.textContent = '';
             resultado.value = '';
 
             try {
                 // Envia os dados ao backend usando JSON.
-                // O servidor espera receber um objeto com action e text.
+                // O servidor espera receber um objeto com action, text e key.
                 const resposta = await fetch('/crypt', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, text })
+                    body: JSON.stringify({ action, text, key })
                 });
 
                 // Recebe a resposta JSON do servidor.
-                // Ele devolve mensagem e resultado, que são inseridos no DOM.
+                // Ele devolve mensagem, resultado e, no encrypt, a chave gerada.
                 const dados = await resposta.json();
                 mensagem.textContent = dados.mensagem || '';
                 resultado.value = dados.resultado || '';
+                if (dados.key !== undefined) {
+                    chave.value = dados.key;
+                }
             } catch (erro) {
                 mensagem.textContent = 'Erro de comunicação com o servidor.';
             }

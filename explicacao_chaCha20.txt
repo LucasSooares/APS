@@ -170,10 +170,11 @@ Explicação do projeto ChaCha20 em Python
   - usa a chave interna para gerar o fluxo ChaCha20
   - faz XOR e devolve o texto cifrado em hexadecimal
 - Quando o usuário clica em descriptografar:
-  - usa a mesma chave de sessão para tentar reverter o texto
-  - se a chave não existir, retorna erro
-- Como o nonce é fixo e a chave de sessão fica constante durante a execução,
-  o mesmo texto gerará sempre o mesmo resultado enquanto o servidor estiver rodando.
+  - usa a chave informada pelo usuário para tentar reverter o texto
+  - se a chave não for fornecida, retorna erro
+- A cada criptografia, o backend gera uma chave única para essa mensagem.
+- O frontend mostra essa chave no campo "Chave".
+- Para descriptografar, o usuário deve colar o texto cifrado e usar a mesma chave exibida.
 
 11) Resumo do motivo de cada escolha
 - Sem biblioteca externa: para entender a cifra do zero.

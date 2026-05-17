@@ -10,9 +10,6 @@ import socketserver # cria o socket TCP que aceita conexões de rede
 # NONCE fixo apenas para este exemplo. Em um uso real, o nonce deve ser diferente para cada mensagem.
 NONCE = b"123456789012"
 
-# Armazena a chave gerada aleatoriamente durante a execução do servidor.
-chave_sessao = None
-
 
 def rotacionar_esquerda(valor, casas):
     # Rotaciona os bits do valor para a esquerda dentro de 32 bits.
@@ -142,7 +139,7 @@ def preparar_chave(chave):
 
 def gerar_chave_aleatoria():
     # Gera uma chave de 10 caracteres sem usar bibliotecas externas.
-    # Essa chave é interna ao servidor e não é mostrada no front-end.
+    # Essa chave é única para cada mensagem criptografada.
     # Variáveis principais:
     # - codigo: os bytes do próprio arquivo, usados como fonte de entropia.
     # - valor: acumulador que mistura os bytes do código e o id de um novo objeto.
@@ -186,15 +183,13 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
         return super().do_GET()
 
     def do_POST(self):
-        global chave_sessao
-
-        # Apenas a rota /crypt é aceita para processar criptografia/descriptografia.
+        # Apenas a rota /crypt é aceita para processar criptografia/descriptografar.
         if self.path != "/crypt":
             self.send_error(404, "Not found")
             return
 
         # Lê o corpo da requisição JSON enviado pelo frontend.
-        # O frontend usa fetch para enviar um objeto { action, text }.
+        # O frontend usa fetch para enviar um objeto { action, text, key }.
         tamanho = int(self.headers.get("Content-Length", 0))
         corpo = self.rfile.read(tamanho).decode("utf-8")
 
@@ -206,34 +201,32 @@ class ChaChaHandler(http.server.SimpleHTTPRequestHandler):
 
         # action define se vamos criptografar ou descriptografar.
         # text é o texto digitado pelo usuário.
+        # key é a chave usada no ChaCha20 para descriptografa ou a chave exibida no encrypt.
         acao = dados.get("action", "")
         texto = dados.get("text", "")
+        chave = dados.get("key", "").strip()
 
         if not texto:
             responder_json(self, {"mensagem": "Por favor, digite um texto.", "resultado": ""}, 400)
             return
 
-        # A chave é armazenada apenas no servidor.
-        # Para criptografar, geramos uma nova chave se ainda não houver.
-        # Para descriptografar, precisamos já ter uma chave em sessão.
         if acao == "encrypt":
-            if not chave_sessao:
-                chave_sessao = gerar_chave_aleatoria()
+            chave = gerar_chave_aleatoria()
         elif acao == "decrypt":
-            if not chave_sessao:
-                responder_json(self, {"mensagem": "Nenhuma chave disponível para descriptografar.", "resultado": ""}, 400)
+            if not chave:
+                responder_json(self, {"mensagem": "Por favor, informe a chave usada na criptografia.", "resultado": ""}, 400)
                 return
         else:
             responder_json(self, {"mensagem": "Ação inválida.", "resultado": ""}, 400)
             return
 
-        chave_bytes = preparar_chave(chave_sessao)
+        chave_bytes = preparar_chave(chave)
 
         try:
             if acao == "encrypt":
                 texto_bytes = texto.encode("utf-8")
                 cifrado = criptografar(chave_bytes, NONCE, texto_bytes)
-                responder_json(self, {"mensagem": "Texto criptografado.", "resultado": cifrado.hex()})
+                responder_json(self, {"mensagem": "Texto criptografado.", "resultado": cifrado.hex(), "key": chave})
                 return
 
             if acao == "decrypt":
