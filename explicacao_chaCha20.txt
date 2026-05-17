@@ -205,4 +205,10 @@ Explicação do projeto ChaCha20 em Python
   - como o resultado do backend chega ao frontend via `fetch()`.
 - Essas informações foram incluídas para você poder apresentar a origem das decisões e as fontes do trabalho.
 
+14) Arquivo separado de demonstração
+- Um arquivo novo foi criado: `chacha20_console.py`.
+- Ele contém apenas a lógica do ChaCha20 e não usa frontend ou servidor HTTP.
+- O usuário pode rodar o arquivo no terminal e escolher entre criptografar ou descriptografar.
+- Ele gera uma chave única para cada criptografia e mostra o resultado diretamente na tela.
+
 Observação: este arquivo explica o projeto, a lógica e o motivo de cada parte. Se quiser, posso criar também uma versão em formato de comentários diretamente no código fonte.
