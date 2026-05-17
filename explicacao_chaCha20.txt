@@ -1,0 +1,160 @@
+Explicação do projeto ChaCha20 em Python
+
+1) Por que o projeto é assim
+- O projeto implementa ChaCha20 em Python puro, sem bibliotecas externas.
+- A ideia é mostrar como a cifra funciona por dentro: estado, mistura, adição modular, XOR e rotação.
+- O frontend é simples: HTML + CSS + formulário. O servidor Python recebe o texto e devolve resultado.
+- A chave aleatória é usada apenas internamente no servidor, não é mostrada no frontend.
+- Isso permite explicar o processo sem expor a chave ao usuário.
+
+2) Por que usamos ChaCha20
+- ChaCha20 é uma cifra de fluxo moderna e simples de implementar.
+- Ela gera um fluxo de bytes a partir de chave + nonce + contador.
+- O texto é combinado com o fluxo usando XOR.
+- A mesma função serve para criptografar e descriptografar porque XOR é reversível.
+
+3) Função rotacionar_esquerda(valor, casas)
+- Faz a rotação de bits à esquerda dentro de 32 bits.
+- Por que? Porque ChaCha20 usa rotações para espalhar os bits de forma não linear.
+- Rotação preserva todos os bits, apenas muda suas posições.
+- Isso ajuda a evitar padrões que apareceriam se usássemos apenas soma ou XOR.
+
+4) Função quarter_round(estado, a, b, c, d)
+- Esta função mistura quatro palavras do estado.
+- Um `quarter round` é um passo básico do ChaCha20.
+- Ele pega 4 valores do estado e aplica 8 operações para misturá-los.
+- Se a professora perguntar “o que é um quarter round?”, responda:
+  - “É um passo do ChaCha20 que mistura quatro palavras do estado usando soma,
+    XOR e rotação. Ele é chamado de quarter round porque atua em um quarto das
+    16 palavras do estado de cada vez.”
+- Por que usamos 4 valores? Porque ChaCha20 trabalha em blocos de 16 palavras,
+  e cada passo mistura grupos de 4.
+- Cada linha faz uma operação específica:
+  1. estado[a] = estado[a] + estado[b] (mod 2^32)
+     - soma modular une os bits de a e b.
+     - isso mistura informação de b dentro de a.
+  2. estado[d] = rotacionar_esquerda(estado[d] ^ estado[a], 16)
+     - XOR junta bits de d e a.
+     - rotação de 16 bits espalha a dependência dos bits pelo valor.
+  3. estado[c] = estado[c] + estado[d] (mod 2^32)
+     - soma modular agora mistura d em c.
+  4. estado[b] = rotacionar_esquerda(estado[b] ^ estado[c], 12)
+     - XOR mistura c em b.
+     - rotação de 12 bits propaga os bits para posições diferentes.
+  5. estado[a] = estado[a] + estado[b] (mod 2^32)
+     - soma modular de novo para reforçar a mistura.
+  6. estado[d] = rotacionar_esquerda(estado[d] ^ estado[a], 8)
+     - XOR final entre d e a atualizados.
+     - rotação de 8 bits altera ainda mais a estrutura dos bits.
+  7. estado[c] = estado[c] + estado[d] (mod 2^32)
+     - soma final para misturar d em c.
+  8. estado[b] = rotacionar_esquerda(estado[b] ^ estado[c], 7)
+     - último XOR/rotação para completar a difusão.
+- Por que soma + XOR + rotação?
+  - soma traz dependência aritmética.
+  - XOR traz dependência booleana.
+  - rotação evita linearidade e espalha os bits.
+- O resultado é que cada saída depende de forma complexa de todos os quatro valores de entrada.
+
+4.1) Variáveis de quarter_round
+- estado: lista de 16 palavras de 32 bits que representam todo o estado interno.
+- a, b, c, d: índices dentro de `estado` que definem o grupo de 4 palavras a misturar.
+- cada palavra do estado é atualizada em sequência, então o valor de cada variável
+  influencia os passos seguintes.
+- usar índices permite aplicar o mesmo passo em diferentes posições do estado.
+
+5) Função bloco_chacha20(chave, nonce, contador)
+- Variáveis principais:
+  - chave: a chave secreta usada para gerar o fluxo.
+  - nonce: valor único por mensagem, evita reutilização de fluxo.
+  - contador: número do bloco, altera o fluxo a cada 64 bytes.
+- O bloco ChaCha20 gera 64 bytes de fluxo.
+- O estado inicial tem:
+  - 4 constantes fixas (para não depender só da chave)
+  - 8 palavras da chave de 32 bytes
+  - 1 contador de bloco
+  - 3 palavras do nonce de 12 bytes
+- Por que constantes fixas? Para que o estado inicial seja sempre diferente de uma simples repetição da chave.
+- Por que contador + nonce?
+  - contador muda o fluxo para cada bloco de 64 bytes.
+  - nonce deve variar por mensagem para evitar reutilização do mesmo fluxo.
+- Depois montamos o estado de trabalho como cópia do estado inicial.
+- Executamos 10 rodadas de ChaCha20:
+  - 4 quarter rounds em colunas
+  - 4 quarter rounds em diagonais
+- Por que colunas e diagonais?
+  - Isso garante que todas as 16 palavras interajam entre si.
+  - Colunas misturam valores verticalmente.
+  - diagonais misturam valores cruzados.
+- Por fim somamos o estado original com o estado transformado.
+  - Isso é chamado de "adição de feedforward".
+  - Serve para reforçar a saída e manter alguma ligação com o estado inicial.
+- O bloco final é convertido em bytes little-endian.
+
+6) Função criptografar(chave, nonce, texto)
+- Variáveis principais:
+  - chave: usada para gerar o fluxo do ChaCha20.
+  - nonce: garante que o fluxo varie entre mensagens.
+  - texto: os bytes que serão cifrados ou decifrados.
+- Gera o fluxo do ChaCha20 bloco a bloco.
+- Para cada bloco de 64 bytes do texto:
+  - chama bloco_chacha20(chave, nonce, contador)
+  - recebe 64 bytes de fluxo
+  - faz XOR byte a byte com o texto
+- Por que isso funciona tanto para cifrar quanto para decifrar?
+  - XOR é reversível: A ^ B ^ B = A
+  - então aplicar o mesmo fluxo em texto cifrado devolve o texto original.
+- Por que 64 bytes por bloco?
+  - ChaCha20 produz 64 bytes por rodada de estado.
+  - assim o texto pode ser maior que 64 bytes e ainda ser processado em partes.
+
+7) Função preparar_chave(chave)
+- Variável principal:
+  - chave: texto legível que será convertido em 32 bytes.
+- Converte a chave de texto em bytes UTF-8.
+- ChaCha20 exige chave de 32 bytes.
+- Se a chave for menor, repetimos o conteúdo até preencher 32 bytes.
+- Por que repetimos?
+  - para manter uma chave de 32 bytes sem depender de bibliotecas externas.
+  - isso simplifica e evita erro de tamanho insuficiente.
+
+8) Função gerar_chave_aleatoria()
+- Variáveis principais:
+  - codigo: o conteúdo do próprio arquivo Python, usado como fonte de entropia.
+  - valor: número intermediário que mistura os bytes do código e o id do objeto.
+  - caracteres: lista de caracteres permitidos para a chave.
+  - chave: string final de 10 caracteres.
+- Gera uma chave de 10 caracteres sem usar biblioteca extra.
+- Usa o próprio código do arquivo como fonte de dados.
+- Mistura os bytes do código em um valor inicial.
+- Usa um gerador linear simples para criar 10 caracteres hexadecimais.
+- A chave é "aleatória" no sentido de que varia com o ambiente de execução,
+  mas não é criptograficamente forte.
+- No projeto, essa chave é interna ao servidor e não é exibida no frontend.
+
+9) Renderização HTML
+- A página HTML mostra apenas o campo de texto e os botões.
+- A chave não aparece para o usuário.
+- O servidor responde com o resultado e mensagens de erro.
+
+10) Comportamento do projeto
+- Quando o usuário clica em criptografar:
+  - o servidor gera a chave de sessão se ainda não existir
+  - usa a chave interna para gerar o fluxo ChaCha20
+  - faz XOR e devolve o texto cifrado em hexadecimal
+- Quando o usuário clica em descriptografar:
+  - usa a mesma chave de sessão para tentar reverter o texto
+  - se a chave não existir, retorna erro
+- Como o nonce é fixo e a chave de sessão fica constante durante a execução,
+  o mesmo texto gerará sempre o mesmo resultado enquanto o servidor estiver rodando.
+
+11) Resumo do motivo de cada escolha
+- Sem biblioteca externa: para entender a cifra do zero.
+- Chave interna: para separar front-end e lógica de criptografia.
+- Sem exibir chave: porque é inseguro e o usuário não precisa vê-la.
+- Comentários no código: para explicar passo a passo o porquê de cada operação.
+- XOR + fluxo: porque é o mecanismo básico de uma cifra de fluxo.
+- Soma modular + XOR + rotação: porque ChaCha20 escolheu essas operações para segurança e difusão.
+
+---
+Observação: este arquivo explica o projeto, a lógica e o motivo de cada parte. Se quiser, posso criar também uma versão em formato de comentários diretamente no código fonte.

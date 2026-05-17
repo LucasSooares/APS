@@ -9,31 +9,51 @@
 <body>
     <main class="container">
         <h1>ChaCha20</h1>
+        <p>Digite sua mensagem para criptografar ou cole o resultado hexadecimal para descriptografar.</p>
 
-        <!-- Esse formulário envia os dados para o servidor Python em /crypt -->
-        <form action="/crypt" method="post">
+        <form id="appForm">
             <label for="texto">Texto</label>
-            <!-- name="text" corresponde ao campo lido pelo Python -->
             <textarea id="texto" name="text" placeholder="Digite a mensagem ou o hexadecimal"></textarea>
 
-            <label for="chave">Chave</label>
-            <!-- name="key" corresponde à chave lida pelo Python -->
-            <input id="chave" name="key" type="text" placeholder="Digite a chave" />
-
             <div class="modo">
-                <!-- O botão Cryptografar envia action=encrypt -->
-                <button type="submit" name="action" value="encrypt">Criptografar</button>
-                <!-- O botão Descriptografar envia action=decrypt -->
-                <button type="submit" name="action" value="decrypt">Descriptografar</button>
+                <button type="submit" data-action="encrypt">Criptografar</button>
+                <button type="submit" data-action="decrypt">Descriptografar</button>
             </div>
         </form>
 
-        <!-- Essa área é apenas um espaço visual na página inicial. -->
-        <!-- O resultado real aparece na página retornada pelo servidor após o envio do formulário. -->
         <p class="mensagem"></p>
 
         <label for="resultado">Resultado</label>
         <textarea id="resultado" readonly placeholder="O resultado aparecerá aqui"></textarea>
     </main>
+
+    <script>
+        const form = document.getElementById('appForm');
+        const mensagem = document.querySelector('.mensagem');
+        const resultado = document.getElementById('resultado');
+
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            const action = event.submitter ? event.submitter.dataset.action : 'encrypt';
+            const text = document.getElementById('texto').value;
+
+            mensagem.textContent = '';
+            resultado.value = '';
+
+            try {
+                const resposta = await fetch('/crypt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, text })
+                });
+
+                const dados = await resposta.json();
+                mensagem.textContent = dados.mensagem || '';
+                resultado.value = dados.resultado || '';
+            } catch (erro) {
+                mensagem.textContent = 'Erro de comunicação com o servidor.';
+            }
+        });
+    </script>
 </body>
 </html>
