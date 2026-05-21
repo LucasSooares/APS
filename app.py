@@ -103,6 +103,9 @@ def bloco_chacha20(chave, nonce, contador):
     resultado = bytearray()
     for i in range(16):
         numero = (trabalho[i] + estado[i]) & 0xFFFFFFFF
+        # `to_bytes()` é um método built-in do tipo inteiro em Python.
+        # Ele converte o número em uma sequência de bytes de tamanho fixo
+        # no formato Little Endian. Não é uma biblioteca externa.
         resultado.extend(numero.to_bytes(4, "little"))
 
     return bytes(resultado)
