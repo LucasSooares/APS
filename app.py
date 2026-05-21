@@ -98,6 +98,8 @@ def bloco_chacha20(chave, nonce, contador):
 
     # Soma o estado original com o estado transformado para produzir o bloco final.
     # Isso preserva parte do estado original e adiciona uma camada extra de mistura.
+    # `bytearray()` cria um buffer vazio mutável de bytes, que podemos preencher
+    # com mais bytes usando `extend()` antes de converter para `bytes`.
     resultado = bytearray()
     for i in range(16):
         numero = (trabalho[i] + estado[i]) & 0xFFFFFFFF
@@ -112,6 +114,9 @@ def criptografar(chave, nonce, texto):
     # Cada byte do texto é combinado com o byte correspondente do fluxo.
     # A operação XOR é reversível: aplicar duas vezes com o mesmo fluxo retorna o original.
     # Isso significa que a mesma função serve para cifrar e decifrar.
+    # `bytearray()` cria um buffer vazio mutável de bytes, que permite usar
+    # `append()` para adicionar o resultado da operação XOR e só depois converter
+    # para `bytes` na saída.
     resultado = bytearray()
 
     # Processa o texto em blocos de 64 bytes.
